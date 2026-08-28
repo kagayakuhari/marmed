@@ -1,15 +1,34 @@
 export const CONFIG = {
 
 	map: {
-		initialCenter: [10.0, 39.0],
-		initialZoom: 5.0,
 
-		minZoom: 3,
+		// Center of Spain
+		initialCenter: [
+			-3.7,
+			40.2
+		],
+
+		// Good initial view of mainland Spain
+		initialZoom: 5.5,
+
+		minZoom: 5,
 		maxZoom: 18,
 
+		/*
+		 * Approximate geographic operating area.
+		 *
+		 * This deliberately includes offshore waters because
+		 * this is a marine application.
+		 */
 		maxBounds: [
-			[-12, 27],
-			[45, 50]
+			[
+				-11.5,
+				33.5
+			],
+			[
+				5.5,
+				44.8
+			]
 		]
 	},
 
