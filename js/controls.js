@@ -3,6 +3,93 @@ import {CONFIG} from "./config.js";
 let map = null;
 
 
+import {
+	setBathymetryVisibility
+} from "./bathymetry.js";
+
+
+export function initializeControls(map) {
+
+	const layersButton =
+		document.getElementById("layers-button");
+
+	const layerPanel =
+		document.getElementById("layer-panel");
+
+	const closeLayers =
+		document.getElementById("close-layers");
+
+	const bathymetryToggle =
+		document.getElementById("bathymetry-toggle");
+
+	const closeDepth =
+		document.getElementById("close-depth");
+
+
+	/*
+	 * Layers button
+	 */
+	if (layersButton && layerPanel) {
+
+		layersButton.addEventListener("click", () => {
+			layerPanel.classList.toggle("hidden");
+		});
+
+	}
+
+
+	/*
+	 * Close layers
+	 */
+	if (closeLayers && layerPanel) {
+
+		closeLayers.addEventListener("click", () => {
+			layerPanel.classList.add("hidden");
+		});
+
+	}
+
+
+	/*
+	 * Bathymetry visibility
+	 */
+	if (bathymetryToggle) {
+
+		bathymetryToggle.addEventListener(
+			"change",
+			event => {
+
+				setBathymetryVisibility(
+					event.target.checked
+				);
+
+			}
+		);
+
+	}
+
+
+	/*
+	 * Close depth panel
+	 */
+	if (closeDepth) {
+
+		closeDepth.addEventListener("click", () => {
+
+			const depthPanel =
+				document.getElementById("depth-panel");
+
+			if (depthPanel) {
+				depthPanel.classList.add("hidden");
+			}
+
+		});
+
+	}
+
+}
+
+
 /*
  * Initialize bathymetry visual layer.
  */
