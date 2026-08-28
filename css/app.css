@@ -260,6 +260,15 @@ body {
   font-size: 11px;
 }
 
+.bathymetry-resolution{
+  display: flex;
+  justify-content: space-between;
+
+  color: var(--muted);
+
+  font-size: 12px;
+}
+
 /* ---------------------------------
    Loading
 ---------------------------------- */
