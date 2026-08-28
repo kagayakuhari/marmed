@@ -10,25 +10,88 @@ import {
 } from "./controls.js";
 
 
-const map = createMap();
+console.log("[Med Marine] Starting application");
 
 
+let map;
+
+
+try {
+
+	/*
+	 * Create map
+	 */
+	map = createMap();
+
+	console.log("[Med Marine] Map object created");
+
+
+} catch (error) {
+
+	console.error(
+		"[Med Marine] Map initialization failed:",
+		error
+	);
+
+	throw error;
+
+}
+
+
+/*
+ * Map loaded
+ */
 map.on("load", async () => {
 
+	console.log(
+		"[Med Marine] Map loaded"
+	);
+
+
 	/*
-	 * Add bathymetry.
+	 * Bathymetry
 	 */
-	initializeBathymetry(map);
+	try {
+
+		initializeBathymetry(map);
+
+		console.log(
+			"[Med Marine] Bathymetry initialized"
+		);
+
+	} catch (error) {
+
+		console.error(
+			"[Med Marine] Bathymetry initialization failed:",
+			error
+		);
+
+	}
 
 
 	/*
-	 * Add UI controls.
+	 * Controls
 	 */
-	initializeControls(map);
+	try {
+
+		initializeControls(map);
+
+		console.log(
+			"[Med Marine] Controls initialized"
+		);
+
+	} catch (error) {
+
+		console.error(
+			"[Med Marine] Controls initialization failed:",
+			error
+		);
+
+	}
 
 
 	/*
-	 * Map click → depth query.
+	 * Map click → depth
 	 */
 	map.on("click", async event => {
 
@@ -49,6 +112,13 @@ map.on("load", async () => {
 
 		try {
 
+			console.log(
+				"[Med Marine] Querying depth:",
+				lat,
+				lng
+			);
+
+
 			const depth =
 				await getDepth(lat, lng);
 
@@ -59,14 +129,20 @@ map.on("load", async () => {
 				lng
 			);
 
+
 		} catch (error) {
 
-			console.error(error);
+			console.error(
+				"[Med Marine] Depth query failed:",
+				error
+			);
+
 
 			showDepthError(
 				lat,
 				lng
 			);
+
 
 		} finally {
 
@@ -78,18 +154,20 @@ map.on("load", async () => {
 
 
 	/*
-	 * Change cursor when hovering over the map.
+	 * Crosshair cursor
 	 */
 	map.on("mouseenter", () => {
 
-		map.getCanvas().style.cursor = "crosshair";
+		map.getCanvas().style.cursor =
+			"crosshair";
 
 	});
 
 
 	map.on("mouseleave", () => {
 
-		map.getCanvas().style.cursor = "";
+		map.getCanvas().style.cursor =
+			"";
 
 	});
 
@@ -98,33 +176,44 @@ map.on("load", async () => {
 
 function showDepthPanel(lat, lng) {
 
-	document
-		.getElementById("depth-panel")
-		.classList.remove("hidden");
+	const panel =
+		document.getElementById("depth-panel");
+
+	const latitude =
+		document.getElementById("depth-lat");
+
+	const longitude =
+		document.getElementById("depth-lon");
+
+	const value =
+		document.getElementById("depth-value");
+
+	const status =
+		document.getElementById("depth-status");
 
 
-	document
-		.getElementById("depth-lat")
-		.textContent =
-		lat.toFixed(5);
+	if (panel) {
+		panel.classList.remove("hidden");
+	}
 
+	if (latitude) {
+		latitude.textContent =
+			lat.toFixed(5);
+	}
 
-	document
-		.getElementById("depth-lon")
-		.textContent =
-		lng.toFixed(5);
+	if (longitude) {
+		longitude.textContent =
+			lng.toFixed(5);
+	}
 
+	if (value) {
+		value.textContent = "…";
+	}
 
-	document
-		.getElementById("depth-value")
-		.textContent =
-		"…";
-
-
-	document
-		.getElementById("depth-status")
-		.textContent =
-		"Querying EMODnet Bathymetry…";
+	if (status) {
+		status.textContent =
+			"Querying EMODnet Bathymetry…";
+	}
 
 }
 
@@ -141,65 +230,84 @@ function showDepthResult(
 
 	if (!Number.isFinite(value)) {
 
-		showDepthError(lat, lng);
+		showDepthError(
+			lat,
+			lng
+		);
 
 		return;
 
 	}
 
 
-	/*
-	 * Bathymetry convention:
-	 *
-	 * EMODnet depths are represented as bathymetric
-	 * elevations/depths depending on the API product.
-	 *
-	 * For the user-facing display we want:
-	 *
-	 * positive = metres below sea level.
-	 */
 	const depthMetres =
 		Math.abs(value);
 
 
-	document
-		.getElementById("depth-value")
-		.textContent =
-		`${depthMetres.toFixed(1)} m`;
+	const depthElement =
+		document.getElementById("depth-value");
+
+	const statusElement =
+		document.getElementById("depth-status");
 
 
-	document
-		.getElementById("depth-status")
-		.textContent =
-		"EMODnet Bathymetry — modelled/compiled depth. Not an official navigational chart.";
+	if (depthElement) {
+
+		depthElement.textContent =
+			`${depthMetres.toFixed(1)} m`;
+
+	}
+
+
+	if (statusElement) {
+
+		statusElement.textContent =
+			"EMODnet Bathymetry. Not an official navigational chart.";
+
+	}
 
 }
 
 
 function showDepthError(lat, lng) {
 
-	document
-		.getElementById("depth-value")
-		.textContent =
-		"Unavailable";
+	const value =
+		document.getElementById("depth-value");
+
+	const status =
+		document.getElementById("depth-status");
 
 
-	document
-		.getElementById("depth-status")
-		.textContent =
-		"Depth could not be retrieved for this location.";
+	if (value) {
+		value.textContent =
+			"Unavailable";
+	}
+
+
+	if (status) {
+
+		status.textContent =
+			"Depth could not be retrieved for this location.";
+
+	}
 
 }
 
 
 function showLoading(show) {
 
-	document
-		.getElementById("loading")
-		.classList.toggle(
+	const loading =
+		document.getElementById("loading");
+
+
+	if (loading) {
+
+		loading.classList.toggle(
 			"hidden",
 			!show
 		);
+
+	}
 
 }
 
