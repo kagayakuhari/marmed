@@ -1,0 +1,85 @@
+{
+	"version": 1,
+	"region": "Spain",
+	"updated": null,
+	"areas": [
+		{
+			"id": "spain-east",
+			"name": "Spanish Mediterranean coast",
+			"bounds": [
+				-0.9,
+				37.0,
+				4.5,
+				42.2
+			],
+			"status": "catalogue",
+			"source": "EMODnet High Resolution Bathymetry",
+			"notes": "Populate from EMODnet HR-DTM catalogue."
+		},
+		{
+			"id": "catalonia",
+			"name": "Catalonia",
+			"bounds": [
+				0.0,
+				40.4,
+				3.5,
+				42.5
+			],
+			"status": "catalogue",
+			"source": "EMODnet High Resolution Bathymetry",
+			"notes": "Populate from EMODnet HR-DTM catalogue."
+		},
+		{
+			"id": "valencia",
+			"name": "Valencian Community",
+			"bounds": [
+				-0.8,
+				38.0,
+				0.5,
+				40.8
+			],
+			"status": "catalogue",
+			"source": "EMODnet High Resolution Bathymetry",
+			"notes": "Populate from EMODnet HR-DTM catalogue."
+		},
+		{
+			"id": "murcia",
+			"name": "Region of Murcia",
+			"bounds": [
+				-1.8,
+				37.3,
+				-0.3,
+				38.5
+			],
+			"status": "catalogue",
+			"source": "EMODnet High Resolution Bathymetry",
+			"notes": "Populate from EMODnet HR-DTM catalogue."
+		},
+		{
+			"id": "andalusia-mediterranean",
+			"name": "Andalusia Mediterranean coast",
+			"bounds": [
+				-5.7,
+				35.8,
+				-1.5,
+				37.7
+			],
+			"status": "catalogue",
+			"source": "EMODnet High Resolution Bathymetry",
+			"notes": "Populate from EMODnet HR-DTM catalogue."
+		},
+		{
+			"id": "balearic",
+			"name": "Balearic Islands",
+			"bounds": [
+				1.0,
+				38.5,
+				4.5,
+				40.2
+			],
+			"status": "catalogue",
+			"source": "EMODnet High Resolution Bathymetry",
+			"notes": "Populate from EMODnet HR-DTM catalogue."
+		}
+	]
+}

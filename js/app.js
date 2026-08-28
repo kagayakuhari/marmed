@@ -8,7 +8,13 @@ import {
 import {
 	initializeControls
 } from "./controls.js";
+import {
+	loadBathymetryCoverage
+} from "./bathymetry-coverage.js";
 
+import {
+	initializeHRBathymetry
+} from "./hr-bathymetry.js";
 
 console.log("[Med Marine] Starting application");
 
@@ -68,6 +74,27 @@ map.on("load", async () => {
 
 	}
 
+	/*
+	 * HR Bathymetry
+	 */
+	try {
+
+		await loadBathymetryCoverage();
+
+		initializeHRBathymetry(map);
+
+		console.log(
+			"[Med Marine] HR bathymetry initialized"
+		);
+
+	} catch (error) {
+
+		console.error(
+			"[Med Marine] HR bathymetry initialization failed:",
+			error
+		);
+
+	}
 
 	/*
 	 * Controls
