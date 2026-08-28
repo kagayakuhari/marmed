@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  >
+
+  <meta
+    name="description"
+    content="Mediterranean marine bathymetry viewer"
+  >
+
+  <title>Med Marine — Bathymetry</title>
+
+  <!-- MapLibre -->
+  <link
+    href="https://unpkg.com/maplibre-gl@5.14.0/dist/maplibre-gl.css"
+    rel="stylesheet"
+  >
+
+  <!-- Application CSS -->
+  <link
+    rel="stylesheet"
+    href="./css/app.css"
+  >
+</head>
+
+<body>
+
+  <div id="app">
+
+    <!-- Map -->
+    <main id="map"></main>
+
+    <!-- Top bar -->
+    <header class="topbar">
+
+      <div class="brand">
+        <div class="brand-title">MED MARINE</div>
+        <div class="brand-subtitle">Bathymetry</div>
+      </div>
+
+      <div class="topbar-actions">
+        <button
+          id="locate-button"
+          class="icon-button"
+          title="Use my location"
+          aria-label="Use my location"
+        >
+          ◎
+        </button>
+
+        <button
+          id="layers-button"
+          class="icon-button"
+          title="Layers"
+          aria-label="Layers"
+        >
+          ☰
+        </button>
+      </div>
+
+    </header>
+
+    <!-- Layer panel -->
+    <section
+      id="layer-panel"
+      class="floating-panel layer-panel hidden"
+      aria-label="Map layers"
+    >
+
+      <div class="panel-header">
+        <span>Layers</span>
+
+        <button
+          id="close-layers"
+          class="close-button"
+          aria-label="Close layers"
+        >
+          ×
+        </button>
+      </div>
+
+      <label class="layer-option">
+        <input
+          type="checkbox"
+          id="bathymetry-toggle"
+          checked
+        >
+        <span>Bathymetry</span>
+      </label>
+
+      <label class="layer-option">
+        <input
+          type="checkbox"
+          id="contour-toggle"
+          checked
+        >
+        <span>Depth contours</span>
+      </label>
+
+    </section>
+
+    <!-- Depth information -->
+    <section
+      id="depth-panel"
+      class="depth-panel hidden"
+      aria-live="polite"
+    >
+
+      <div class="depth-panel-header">
+
+        <div>
+          <div class="eyebrow">DEPTH</div>
+          <div id="depth-value" class="depth-value">
+            —
+          </div>
+        </div>
+
+        <button
+          id="close-depth"
+          class="close-button"
+          aria-label="Close depth information"
+        >
+          ×
+        </button>
+
+      </div>
+
+      <div class="depth-meta">
+
+        <div class="coordinate-row">
+          <span>Latitude</span>
+          <strong id="depth-lat">—</strong>
+        </div>
+
+        <div class="coordinate-row">
+          <span>Longitude</span>
+          <strong id="depth-lon">—</strong>
+        </div>
+
+        <div class="coordinate-row">
+          <span>Source</span>
+          <strong>EMODnet</strong>
+        </div>
+
+      </div>
+
+      <div
+        id="depth-status"
+        class="depth-status"
+      >
+        Click the map to query depth.
+      </div>
+
+    </section>
+
+    <!-- Loading indicator -->
+    <div
+      id="loading"
+      class="loading hidden"
+    >
+      <div class="spinner"></div>
+      <span>Loading depth…</span>
+    </div>
+
+    <!-- Attribution -->
+    <div class="map-attribution">
+      Bathymetry ©
+      <a
+        href="https://emodnet.ec.europa.eu/en/bathymetry"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        EMODnet Bathymetry
+      </a>
+    </div>
+
+  </div>
+
+  <!-- MapLibre -->
+  <script
+    src="https://unpkg.com/maplibre-gl@5.14.0/dist/maplibre-gl.js"
+  ></script>
+
+  <!-- Application -->
+  <script type="module" src="./js/app.js"></script>
+
+</body>
+</html>
