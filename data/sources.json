@@ -1,0 +1,19 @@
+{
+	"bathymetry": {
+		"name": "EMODnet Bathymetry",
+		"organization": "European Marine Observation and Data Network",
+		"website": "https://emodnet.ec.europa.eu/en/bathymetry",
+		"wmtsCapabilities": "https://tiles.emodnet-bathymetry.eu/wmts/1.0.0/WMTSCapabilities.xml",
+		"wms": "https://ows.emodnet-bathymetry.eu/wms",
+		"wcs": "https://ows.emodnet-bathymetry.eu/wcs",
+		"wfs": "https://ows.emodnet-bathymetry.eu/wfs",
+		"rest": "https://rest.emodnet-bathymetry.eu/",
+		"purpose": "Bathymetry visualisation and depth information",
+		"officialNavigationalChart": false
+	},
+	"basemap": {
+		"name": "OpenStreetMap",
+		"website": "https://www.openstreetmap.org/",
+		"tileServer": "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+	}
+}
