@@ -186,24 +186,6 @@ function buildWmsTileUrl() {
 	return `${CONFIG.bathymetry.wms}?${params.toString()}`;
 }
 
-
-/*
- * Show / hide the bathymetry layer.
- */
-export function setBathymetryVisibility(visible) {
-
-	if (!map || !map.getLayer("bathymetry")) {
-		return;
-	}
-
-	map.setLayoutProperty(
-		"bathymetry",
-		"visibility",
-		visible ? "visible" : "none"
-	);
-}
-
-
 /*
  * Query a depth from EMODnet.
  *
