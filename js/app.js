@@ -8,12 +8,10 @@ import {
 import {
 	initializeControls
 } from "./controls.js";
-import {
-	loadBathymetryCoverage
-} from "./bathymetry-coverage.js";
 
 import {
-	initializeHRBathymetry
+	initializeHRBathymetry,
+	initializeHRBathymetryEvents
 } from "./hr-bathymetry.js";
 
 console.log("[Med Marine] Starting application");
@@ -79,9 +77,9 @@ map.on("load", async () => {
 	 */
 	try {
 
-		await loadBathymetryCoverage();
-
 		initializeHRBathymetry(map);
+
+		initializeHRBathymetryEvents();
 
 		console.log(
 			"[Med Marine] HR bathymetry initialized"

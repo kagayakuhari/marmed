@@ -1,13 +1,21 @@
-import {
-	findHRZone
-} from "./bathymetry-coverage.js";
+import {CONFIG} from "./config.js";
 
 
 let map = null;
 
-let activeZone = null;
+let hrEnabled = false;
 
 
+/*
+ * EMODnet High Resolution Bathymetry
+ *
+ * Actual live WMS layer:
+ *
+ *   emodnet:hr_bathymetry_area
+ *
+ * EMODnet's HR layer is a multi-resolution collection of
+ * higher-resolution DTMs for selected areas.
+ */
 export function initializeHRBathymetry(
 	mapInstance
 ) {
@@ -15,119 +23,108 @@ export function initializeHRBathymetry(
 	map = mapInstance;
 
 
-	map.on(
-		"moveend",
-		updateHRBathymetry
+	/*
+	 * Add the HR WMS source.
+	 *
+	 * IMPORTANT:
+	 *
+	 * Keep {bbox-epsg-3857} literal.
+	 * MapLibre replaces it for every tile.
+	 *
+	 * Do NOT put this through URLSearchParams.
+	 */
+	map.addSource(
+		"emodnet-hr-bathymetry",
+		{
+
+			type: "raster",
+
+			tiles: [
+
+				CONFIG.bathymetry.wms +
+
+				"?service=WMS" +
+				"&version=1.1.1" +
+				"&request=GetMap" +
+
+				"&layers=emodnet:hr_bathymetry_area" +
+				"&styles=" +
+
+				"&format=image/png" +
+				"&transparent=true" +
+
+				"&width=256" +
+				"&height=256" +
+
+				"&srs=EPSG:3857" +
+
+				"&bbox={bbox-epsg-3857}"
+
+			],
+
+			tileSize: 256,
+
+			attribution:
+				"High-resolution bathymetry © EMODnet Bathymetry"
+
+		}
 	);
 
 
-	map.on(
-		"zoomend",
-		updateHRBathymetry
+	/*
+	 * Put HR above the standard bathymetry.
+	 *
+	 * At zoom < 11 the layer does not request tiles.
+	 */
+	map.addLayer({
+
+		id: "hr-bathymetry",
+
+		type: "raster",
+
+		source: "emodnet-hr-bathymetry",
+
+		minzoom: 10,
+
+		maxzoom: 19,
+
+		paint: {
+
+			"raster-opacity": 1.0,
+
+			"raster-fade-duration": 150,
+
+			"raster-resampling": "linear"
+
+		}
+
+	});
+
+
+	/*
+	 * The layer is now controlled by MapLibre's minzoom.
+	 */
+	hrEnabled = true;
+
+
+	console.log(
+		"[Med Marine] EMODnet HR bathymetry added"
 	);
 
 
-	updateHRBathymetry();
-
+	updateResolutionIndicator();
 }
 
 
-function updateHRBathymetry() {
+/*
+ * Update our UI indicator.
+ */
+function updateResolutionIndicator() {
 
 	if (!map) {
 		return;
 	}
 
-
-	const center =
-		map.getCenter();
-
-
-	const zoom =
-		map.getZoom();
-
-
-	/*
-	 * Don't attempt HR data at overview scales.
-	 */
-	if (zoom < 11) {
-
-		if (activeZone) {
-
-			console.log(
-				"[Med Marine] Leaving HR bathymetry"
-			);
-
-			activeZone = null;
-
-			setResolutionLabel(
-				"Standard bathymetry · ~115 m"
-			);
-
-		}
-
-		return;
-
-	}
-
-
-	const zone =
-		findHRZone(
-			center.lng,
-			center.lat
-		);
-
-
-	if (!zone) {
-
-		if (activeZone) {
-
-			console.log(
-				"[Med Marine] No HR bathymetry at current location"
-			);
-
-			activeZone = null;
-
-		}
-
-		return;
-
-	}
-
-
-	if (
-		activeZone?.id === zone.id
-	) {
-
-		return;
-
-	}
-
-
-	activeZone = zone;
-
-
-	console.log(
-		"[Med Marine] HR bathymetry candidate:",
-		zone.name
-	);
-
-	setResolutionLabel(
-		`High-resolution candidate · ${zone.name}`
-	);
-
-
-	/*
-	 * We deliberately don't add a raster source yet.
-	 *
-	 * The EMODnet catalogue needs to provide the actual
-	 * HR-DTM product/service definition.
-	 */
-}
-
-function setResolutionLabel(
-	text
-) {
 
 	const element =
 		document.getElementById(
@@ -135,11 +132,43 @@ function setResolutionLabel(
 		);
 
 
-	if (element) {
+	if (!element) {
+		return;
+	}
+
+
+	const zoom =
+		map.getZoom();
+
+
+	if (zoom < 11) {
 
 		element.textContent =
-			text;
+			"Standard bathymetry · ~115 m";
+
+		return;
 
 	}
+
+
+	element.textContent =
+		"High-resolution bathymetry · EMODnet";
+}
+
+
+/*
+ * Keep the resolution indicator synchronized.
+ */
+export function initializeHRBathymetryEvents() {
+
+	if (!map) {
+		return;
+	}
+
+
+	map.on(
+		"zoom",
+		updateResolutionIndicator
+	);
 
 }
