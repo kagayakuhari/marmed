@@ -4,33 +4,44 @@ let map = null;
 
 
 /*
- * Initialize bathymetry visual layer.
+ * EMODnet Bathymetry WMTS
+ *
+ * We use the Web Mercator tileset because MapLibre itself
+ * renders the map in EPSG:3857.
+ *
+ * Available EMODnet layer:
+ *
+ *   mean_multicolour
+ *
+ * The current EMODnet WMTS service documents this layer
+ * under the web_mercator tileset.
  */
 export function initializeBathymetry(mapInstance) {
 
 	map = mapInstance;
 
-	/*
-	 * EMODnet WMS:
-	 *
-	 * We use EPSG:3857 because MapLibre renders in Web Mercator.
-	 *
-	 * The example layer documented by EMODnet is:
-	 *
-	 * emodnet:mean_multicolour
-	 */
+	const status =
+		document.getElementById(
+			"bathymetry-status"
+		);
+
+
 	map.addSource("emodnet-bathymetry", {
 
 		type: "raster",
 
 		tiles: [
-			buildWmsTileUrl()
+			"https://tiles.emodnet-bathymetry.eu/" +
+			"web_mercator/" +
+			"{z}/{y}/{x}/" +
+			"mean_multicolour.png"
 		],
 
 		tileSize: 256,
 
 		attribution:
 			"Bathymetry © EMODnet Bathymetry"
+
 	});
 
 
@@ -43,182 +54,185 @@ export function initializeBathymetry(mapInstance) {
 		source: "emodnet-bathymetry",
 
 		paint: {
-			"raster-opacity": 0.78,
-			"raster-fade-duration": 200
+
+			"raster-opacity": 0.82,
+
+			"raster-fade-duration": 200,
+
+			"raster-resampling": "linear"
+
 		}
 
 	});
 
 
-	/*
-	 * Start with the bathymetry visible.
-	 */
+	map.on(
+		"idle",
+		() => {
+
+			if (status) {
+
+				status.textContent =
+					"Bathymetry loaded";
+
+				setTimeout(() => {
+
+					status.classList.add(
+						"hidden"
+					);
+
+				}, 1500);
+
+			}
+
+		}
+	);
+
+
+	map.on(
+		"error",
+		event => {
+
+			console.error(
+				"[Med Marine] Map error:",
+				event.error || event
+			);
+
+			if (status) {
+
+				status.textContent =
+					"Bathymetry tile error";
+
+			}
+
+		}
+	);
+
+
 	setBathymetryVisibility(true);
 }
 
-
 /*
- * Construct a tiled WMS request.
- *
- * MapLibre replaces:
- *
- * {bbox-epsg-3857}
- *
- * with the current tile bounding box.
- */
-function buildWmsTileUrl() {
-
-	const params = new URLSearchParams({
-
-		service: "WMS",
-
-		request: "GetMap",
-
-		version: "1.1.1",
-
-		layers: "emodnet:mean_multicolour",
-
-		styles: "",
-
-		format: "image/png",
-
-		transparent: "true",
-
-		width: "256",
-
-		height: "256",
-
-		srs: "EPSG:3857",
-
-		tiled: "true",
-
-		bbox: "{bbox-epsg-3857}"
-	});
-
-
-	return `${CONFIG.bathymetry.wms}?${params.toString()}`;
-}
-
-
-/*
- * Show / hide the bathymetry layer.
+ * Show / hide bathymetry.
  */
 export function setBathymetryVisibility(visible) {
 
-	if (!map || !map.getLayer("bathymetry")) {
+	if (
+		!map ||
+		!map.getLayer("bathymetry")
+	) {
+
+		console.warn(
+			"[Med Marine] Bathymetry layer not available"
+		);
+
 		return;
 	}
+
 
 	map.setLayoutProperty(
 		"bathymetry",
 		"visibility",
-		visible ? "visible" : "none"
+		visible
+			? "visible"
+			: "none"
 	);
+
 }
 
 
 /*
- * Query a depth from EMODnet.
+ * Query one EMODnet DTM grid cell.
+ *
+ * EMODnet's current REST API documents:
+ *
+ *   /depth_sample?geom=POINT(longitude latitude)
  *
  * IMPORTANT:
  *
- * EMODnet's REST API has several service operations and
- * versions. We keep this function isolated so that the
- * exact request format can be adjusted without touching
- * the map.
+ * WKT uses:
+ *
+ *   longitude latitude
+ *
+ * NOT:
+ *
+ *   latitude longitude
  */
-export async function getDepth(latitude, longitude) {
+export async function getDepth(
+	latitude,
+	longitude
+) {
 
-	/*
-	 * First attempt:
-	 *
-	 * EMODnet's public REST service exposes depth extraction.
-	 *
-	 * The service API should be treated as an external contract.
-	 * If the operation changes, this is the only function
-	 * that needs changing.
-	 */
+	const point =
+		`POINT(${longitude} ${latitude})`;
+
 
 	const url =
 		`${CONFIG.bathymetry.rest}` +
-		`?lat=${encodeURIComponent(latitude)}` +
-		`&lon=${encodeURIComponent(longitude)}`;
+		`depth_sample?geom=${encodeURIComponent(point)}`;
 
 
-	const response = await fetch(url, {
-		headers: {
-			"Accept": "application/json"
-		}
-	});
-
-
-	if (!response.ok) {
-		throw new Error(
-			`EMODnet depth request failed: ${response.status}`
-		);
-	}
-
-
-	const text = await response.text();
-
-	return parseDepthResponse(text);
-}
-
-
-/*
- * Parse possible EMODnet responses.
- *
- * Keeping parsing separate makes the application resilient
- * if the REST response is XML/text rather than JSON.
- */
-function parseDepthResponse(text) {
-
-	/*
-	 * JSON response
-	 */
-	try {
-
-		const json = JSON.parse(text);
-
-		if (typeof json === "number") {
-			return json;
-		}
-
-		if (typeof json.depth === "number") {
-			return json.depth;
-		}
-
-		if (
-			json.data &&
-			typeof json.data.depth === "number"
-		) {
-			return json.data.depth;
-		}
-
-	} catch {
-		/*
-		 * Not JSON.
-		 */
-	}
-
-
-	/*
-	 * Try extracting a numeric depth from a simple response.
-	 *
-	 * This is deliberately conservative.
-	 */
-	const match = text.match(
-		/(?:depth|z|value)\s*[:=]\s*(-?\d+(?:\.\d+)?)/i
+	console.log(
+		"[Med Marine] Depth request:",
+		url
 	);
 
 
-	if (match) {
-		return Number(match[1]);
+	const response =
+		await fetch(url, {
+
+			method: "GET",
+
+			headers: {
+				"Accept": "application/json"
+			}
+
+		});
+
+
+	if (!response.ok) {
+
+		throw new Error(
+			`EMODnet depth request failed: ${response.status}`
+		);
+
+	}
+
+
+	const data =
+		await response.json();
+
+
+	console.log(
+		"[Med Marine] Depth response:",
+		data
+	);
+
+
+	/*
+	 * EMODnet returns:
+	 *
+	 * {
+	 *   min: ...,
+	 *   max: ...,
+	 *   avg: ...,
+	 *   ...
+	 * }
+	 *
+	 * We use avg as the displayed DTM depth.
+	 */
+	if (
+		data &&
+		typeof data.avg === "number"
+	) {
+
+		return data.avg;
+
 	}
 
 
 	throw new Error(
-		"Could not interpret the EMODnet depth response."
+		"EMODnet returned no average depth."
 	);
-}
 
+}

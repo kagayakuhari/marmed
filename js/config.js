@@ -24,6 +24,9 @@ export const CONFIG = {
 		 * The actual layer URL is constructed in bathymetry.js.
 		 */
 
+		wmts:
+			"https://tiles.emodnet-bathymetry.eu/",
+
 		wms: "https://ows.emodnet-bathymetry.eu/wms",
 
 		wmtsCapabilities:

@@ -364,3 +364,29 @@ body {
   }
 }
 
+.bathymetry-status {
+  position: absolute;
+
+  left: 50%;
+  bottom: 70px;
+
+  transform: translateX(-50%);
+
+  padding: 8px 12px;
+
+  background: rgba(7, 19, 29, 0.9);
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+
+  border-radius: 999px;
+
+  color: #dbe8ee;
+
+  font-size: 11px;
+
+  pointer-events: none;
+
+  z-index: 20;
+
+  backdrop-filter: blur(10px);
+}
